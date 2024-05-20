@@ -2,6 +2,8 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import mplfinance as mpf
 
 # Carregando o dataset 'tips'
 tips = sns.load_dataset('tips')
@@ -116,3 +118,32 @@ plt.show()
 sns.histplot(tips['tip'], bins=20, kde=True)
 plt.title('Distribuição das Gorjetas')
 plt.show()
+
+# Adicionando Gráficos de Velas e de Séries Temporais
+# Criando uma série temporal sintética de gorjetas
+np.random.seed(0)
+dates = pd.date_range(start='2021-01-01', periods=len(tips), freq='D')
+tips['date'] = dates
+tips = tips.sort_values('date')
+
+# Gráfico de Série Temporal para Gorjetas
+plt.figure(figsize=(10, 6))
+plt.plot(tips['date'], tips['tip'], label='Tip')
+plt.title('Série Temporal de Gorjetas')
+plt.xlabel('Data')
+plt.ylabel('Gorjeta')
+plt.legend()
+plt.show()
+
+# Gráfico de Velas para Gorjetas
+# Preparar dados para o gráfico de velas
+tips['open'] = tips['tip'].shift(1)
+tips['high'] = tips[['tip', 'open']].max(axis=1)
+tips['low'] = tips[['tip', 'open']].min(axis=1)
+tips['close'] = tips['tip']
+# Remover NaN resultante do shift
+tips = tips.dropna()
+# Dados para o gráfico de velas
+candle_data = tips[['date', 'open', 'high', 'low', 'close']].set_index('date')
+# Plotando gráfico de velas
+mpf.plot(candle_data, type='candle', style='charles', title='Gráfico de Velas de Gorjetas', ylabel='Gorjeta')
